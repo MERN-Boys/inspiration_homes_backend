@@ -1,0 +1,25 @@
+{
+  "name": "inspiration_homes_backend",
+  "version": "1.0.0",
+  "description": "Init Readme",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asyncronous/inspiration_homes_backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asyncronous/inspiration_homes_backend/issues"
+  },
+  "homepage": "https://github.com/asyncronous/inspiration_homes_backend#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.11.12"
+  }
+}
