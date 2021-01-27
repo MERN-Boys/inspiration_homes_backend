@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const JobModel = require("../models/jobs.js")
+const UserModel = require("../models/users.js")
 
 /*
 {
@@ -12,7 +13,7 @@ const JobModel = require("../models/jobs.js")
 */
 
 
-//GET PRODUCTS
+//GET JOBS
 router.get("/", (request, response) => {
     JobModel.find()
     .then(jobs => response.send(jobs))
@@ -31,7 +32,15 @@ router.post("/", (request, response) => {
 
 
     JobModel.create(request.body)
-    .then((document) => response.status(201).send(document))
+    .then((document) => {
+        UserModel.findById(request.body.client)
+        .then(user => {
+            user.jobs.push(document)
+            user.save()
+        })
+        .then(response.status(201).send(document))
+        // response.status(201).send(document)
+    })
     .catch((error) => response.status(406).send(error.message))    
 })
 

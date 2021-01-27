@@ -20,6 +20,11 @@ var ClientSchema = new Schema({
       min: 6,
       max: 1024,
     },
+    jobs: {
+        type: [mongoose.Types.ObjectId], 
+        ref: 'jobs',
+        required: true
+    },
     date: {
       type: Date,
       default: Date.now,
