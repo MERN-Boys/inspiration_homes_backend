@@ -43,40 +43,71 @@ router.put("/:id", (request, response) => {
     .catch(error => response.send(error))
 })
 
-//UPDATE JOB STAGES
+
+//UPDATE JOB PART
 router.patch("/:id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => {
-        stage = job.stages.filter(stage => {
-            return stage.index == request.body.index
-        })
-        // console.log(stage)
+        job.jobComplete = request.body.jobComplete || job.jobComplete
+        job.jobTitle = request.body.jobTitle || job.jobTitle
+        job.buildAddress = request.body.buildAddress || job.buildAddress
 
 
-        for (const key of Object.keys(request.body)) {
-            job.stages[stage[0].index][key] = request.body[key]
+        if (request.body.designDocs){
+            job.designDocs = job.designDocs.concat(request.body.designDocs)
         }
-        console.log(job.stages[0])
-        // job.stages[stage[0].index] = request.body.stages[0]
-        job.save()
-        .then(document => {
-            response.send(document)
-        })
-        .catch(error => response.send(error)) 
-    })
+        // job.stages.concat(request.body.stages)
 
-    // job.stages[result] = request.body
-    // JobModel.update(request.params.id, request.body)
-    // .then(document => response.send(document))
-    // .catch(error => response.send(error))
+        job.markModified('anything');
+        job.save(function(err){
+            if(err){
+                 console.log(err)
+                 return;
+            }
+        })
+        response.send(job)
+    })
+    .catch(error => response.send(error))
 })
 
-// //UPDATE JOB PART
-// router.patch("/:id", (request, response) => {
-//     JobModel.findByIdAndUpdate(request.params.id, request.ody)
-//     .then(document => response.send(document))
-//     .catch(error => response.send(error))
-// })
+//UPDATE JOB Stages
+router.patch("/:id/:stage_id", (request, response) => {
+    JobModel.findById(request.params.id)
+    .then(job => {
+
+        index = request.params.stage_id
+
+        //status
+        job.stages[index].status = request.body.status || job.stages[index].status
+
+        //owed and paid
+        const origOwed = job.stages[index].owed
+        job.stages[index].owed = request.body.owed || origOwed
+        const newOwed = job.stages[index].owed
+
+        if (newOwed < origOwed){
+            job.stages[index].paid = origOwed - newOwed
+        }
+
+        //pictures and comments
+        if (request.body.pictures){
+            job.stages[index].pictures = job.stages[index].pictures.concat(request.body.pictures )
+        }
+        if (request.body.comments){
+            job.stages[index].comments = job.stages[index].comments.concat(request.body.comments)
+        }
+
+        // job.stages[stage[0].index] = request.body.stages[0]
+        job.save()
+        console.log(job)
+        return job
+    })
+    .then(job => {
+        console.log(job)
+        response.send(job)
+    })
+    .catch(error => response.send(error)) 
+})
 
 //DELETE PRODUCT
 router.delete("/:id", (request, response) => {

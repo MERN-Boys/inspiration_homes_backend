@@ -50,8 +50,23 @@ const JobsSchema = new mongoose.Schema({
         required: false
     },
     stages: {
-        type: Array,
-        set: seedStages
+        type: [
+            {
+                index: {type: Number},
+                name: {type: String},
+                status: {type: String},
+                owed: {type: Number},
+                paid: {type: Number},
+                pictures: {type: [String]},
+                comments: {type: [
+                    {
+                        name: {type: String},
+                        comment: {type: String}
+                    }
+                ]}
+            }
+        ],
+        default: seedStages
     }
 })
 
