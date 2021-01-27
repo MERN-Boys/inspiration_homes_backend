@@ -38,4 +38,10 @@ router.post("/", (request, response) => {
     .catch((error) => response.status(406).send(error.message))    
 })
 
+router.delete("/:id", (request, response) => {
+    UserModel.findByIdAndDelete(request.params.id)
+    .then((document) => response.status(200).send(document))
+    .catch((error) => response.status(406).send(error.message))    
+})
+
 module.exports = router;

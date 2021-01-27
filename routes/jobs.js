@@ -5,7 +5,7 @@ const UserModel = require("../models/users.js")
 
 /*
 {
-    "client": "600e6677219fe15ce8a96068",
+    "client": "6010f06afbf8ba03fba4e063",
     "jobTitle": "New Job",
     "buildAddress": "6 Langdon Lane Bellmere 4510",
     "designDocs": "example-link.com"
@@ -29,8 +29,6 @@ router.get("/:id", (request, response) => {
 
 //CREATE JOB
 router.post("/", (request, response) => {
-
-
     JobModel.create(request.body)
     .then((document) => {
         UserModel.findById(request.body.client)
@@ -61,7 +59,6 @@ router.patch("/:id", (request, response) => {
         job.jobTitle = request.body.jobTitle || job.jobTitle
         job.buildAddress = request.body.buildAddress || job.buildAddress
 
-
         if (request.body.designDocs){
             job.designDocs = job.designDocs.concat(request.body.designDocs)
         }
@@ -79,11 +76,11 @@ router.patch("/:id", (request, response) => {
     .catch(error => response.send(error))
 })
 
-//UPDATE JOB Stages
+//UPDATE JOB STAGE PART
 router.patch("/:id/:stage_id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => {
-
+        //get index
         index = request.params.stage_id
 
         //status
@@ -91,11 +88,12 @@ router.patch("/:id/:stage_id", (request, response) => {
 
         //owed and paid
         const origOwed = job.stages[index].owed
-        job.stages[index].owed = request.body.owed || origOwed
+        if (request.body.owed !== null){
+            job.stages[index].owed = request.body.owed
+        }
         const newOwed = job.stages[index].owed
-
         if (newOwed < origOwed){
-            job.stages[index].paid = origOwed - newOwed
+            job.stages[index].paid = job.stages[index].paid + origOwed - newOwed
         }
 
         //pictures and comments
@@ -106,9 +104,7 @@ router.patch("/:id/:stage_id", (request, response) => {
             job.stages[index].comments = job.stages[index].comments.concat(request.body.comments)
         }
 
-        // job.stages[stage[0].index] = request.body.stages[0]
         job.save()
-        console.log(job)
         return job
     })
     .then(job => {
@@ -118,7 +114,20 @@ router.patch("/:id/:stage_id", (request, response) => {
     .catch(error => response.send(error)) 
 })
 
-//DELETE PRODUCT
+//DELETE JOB STAGE
+router.delete("/:id/:stage_id", (request, response) => {
+    JobModel.findById(request.params.id)
+    .then(job => {
+        let index = request.params.stage_id
+        job.stages.splice(index, 1)
+        job.save()
+        return job
+    })
+    .then(confirmation => response.status(200).send(confirmation))
+    .catch(error => response.status(406).send(error))
+})
+
+//DELETE JOB
 router.delete("/:id", (request, response) => {
     JobModel.findByIdAndDelete(request.params.id)
     .then(confirmation => response.status(200).send(confirmation))

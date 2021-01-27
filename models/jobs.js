@@ -46,18 +46,28 @@ const JobsSchema = new mongoose.Schema({
         required: true
     },
     designDocs: {
-        type: [String],
-        required: false
+        type: [
+            {
+                link: {type: String},
+                description: {type: String}
+            }
+        ]
     },
     stages: {
         type: [
             {
-                index: {type: Number},
+                index: {type: Number, required: true},
+
                 name: {type: String},
                 status: {type: String},
                 owed: {type: Number},
                 paid: {type: Number},
-                pictures: {type: [String]},
+                pictures: {type: [
+                    {
+                        link: {type: String},
+                        description: {type: String}
+                    }
+                ]},
                 comments: {type: [
                     {
                         name: {type: String},
