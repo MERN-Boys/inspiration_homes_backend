@@ -2,6 +2,21 @@ const express = require("express")
 const router = express.Router()
 const UserModel = require("../models/users.js")
 
+//post
+//users/
+
+//post
+//signin
+//users/:id
+
+//put
+//edit
+//users/:id
+
+//signout
+//edit
+//user/:id
+
 //GET PRODUCTS
 router.get("/", (request, response) => {
     UserModel.find()

@@ -24,13 +24,13 @@ Comment
 ]
 
 */
+const seedStages = require("./stages.js")
 
 const JobsSchema = new mongoose.Schema({
     jobComplete: {
         type: Boolean,
         default: false,
         required: true,
-
     },
     client: {
         type: mongoose.Types.ObjectId, 
@@ -49,27 +49,10 @@ const JobsSchema = new mongoose.Schema({
         type: [String],
         required: false
     },
-    stages: [{
-        index:  Number,
-        name: String,
-        status: String,
-        owed: Number,
-        paid: Number,
-        pictures: [String],
-        comments: [{
-            commenterId: mongoose.ObjectId,
-            comment: String
-        }]
-    }]
-    // description: {
-    //     type: String,
-    //     required: false
-    // },
-    // price: {
-    //     type: Number,
-    //     require: true
-    // }
-    // stores: [Store]
+    stages: {
+        type: Array,
+        set: seedStages
+    }
 })
 
 const JobModel = mongoose.model("jobs", JobsSchema)
