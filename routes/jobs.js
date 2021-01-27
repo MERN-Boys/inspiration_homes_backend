@@ -5,10 +5,21 @@ const UserModel = require("../models/users.js")
 
 /*
 {
-    "client": "6010f06afbf8ba03fba4e063",
+    "name": "Benjamin",
+    "email": "example@google.com",
+    "password": "jfioehfiafho"
+}
+*/
+
+/* 
+{
+    "client": "60112a6e5d720c04ca3ca07e",
     "jobTitle": "New Job",
     "buildAddress": "6 Langdon Lane Bellmere 4510",
-    "designDocs": "example-link.com"
+    "designDocs": {
+        "link": "examplelink.com",
+        "description": "Great balls of fire"
+    }
 }
 */
 
@@ -129,8 +140,24 @@ router.delete("/:id/:stage_id", (request, response) => {
 
 //DELETE JOB
 router.delete("/:id", (request, response) => {
-    JobModel.findByIdAndDelete(request.params.id)
-    .then(confirmation => response.status(200).send(confirmation))
+    JobModel.findById(request.params.id)
+    .then((job) => {
+        console.log(job.client)
+        UserModel.findById(job.client)
+        .then(user => {
+            let index = user.jobs.indexOf(job._id)
+            if (index !== -1){
+                user.jobs.splice(index, 1)
+            }
+
+            // user.jobs = user.jobs.filter(e => e != job._id)
+            console.log(user.jobs)
+            user.save()
+            job.delete()
+            return "Job Deleted"
+        })
+        .then(confirmation => response.status(200).send(confirmation))
+    })
     .catch(error => response.status(406).send(error))
 })
 

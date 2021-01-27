@@ -23,7 +23,7 @@ var ClientSchema = new Schema({
     jobs: {
         type: [mongoose.Types.ObjectId], 
         ref: 'jobs',
-        required: true
+        // required: true
     },
     date: {
       type: Date,
