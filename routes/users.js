@@ -3,9 +3,10 @@ const router = express.Router()
 const UserModel = require("../models/users.js")
 
 //post
+//create
 //users/
 
-//post
+//post signin
 //signin
 //users/:id
 
@@ -24,12 +25,12 @@ router.get("/", (request, response) => {
     .catch(error => response.send(error))
 })
 
-// //GET PRODUCT
-// router.get("/:id", (request, response) => {
-//     JobsModel.findById(request.params.id)
-//     .then(job => response.status(200).send(job))
-//     .catch(error => response.send(error.message))
-// })
+//GET PRODUCT
+router.get("/:id", (request, response) => {
+    UserModel.findById(request.params.id)
+    .then(job => response.status(200).send(job))
+    .catch(error => response.send(error.message))
+})
 
 //CREATE PRODUCT
 router.post("/", (request, response) => {
