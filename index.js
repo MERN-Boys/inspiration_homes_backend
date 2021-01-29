@@ -6,6 +6,13 @@
 const express = require("express")
 const app = express()
 const mongoose = require("mongoose")
+// const User = require("./models/users.js")
+const passport = require("passport")
+// const cors = require("cors")
+const session = require('express-session')
+const cookieParser = require('cookie-parser')
+const MongoStore = require('connect-mongo')(session)
+require('./passport.js')
 
 const { config } = require('dotenv');
 
@@ -40,9 +47,28 @@ var allowCrossDomain = function(req, res, next) {
     }
 };
 
+// app.use(cors({
+//   origin: "http://localhost:3000", // This should be changed to our front-end url
+//   credentials: true
+// }))
+
+app.use(session({
+  secret: "secret",
+  resave: true,
+  saveUninitialized: false,
+  store: new MongoStore({
+      mongooseConnection: mongoose.connection
+  })
+}))
+
+app.use(cookieParser('secret'))
+
+
 //Middleware
 app.use(allowCrossDomain)
 app.use(express.json())
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use("/jobs", require("./routes/jobs.js"))
 
