@@ -34,7 +34,7 @@ const JobsSchema = new mongoose.Schema({
     },
     client: {
         type: mongoose.Types.ObjectId, 
-        ref: 'client',
+        ref: 'User',
         required: true
     },
     jobTitle: {
@@ -80,6 +80,6 @@ const JobsSchema = new mongoose.Schema({
     }
 })
 
-const JobModel = mongoose.model("jobs", JobsSchema)
+const JobModel = mongoose.model("Job", JobsSchema)
 
 module.exports = JobModel

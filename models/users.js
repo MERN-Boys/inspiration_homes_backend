@@ -1,34 +1,23 @@
-let mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require("mongoose")
+const passportLocalMongoose = require("passport-local-mongoose")
+const passport = require("passport")
 
-var ClientSchema = new Schema({
-    name: {
-      type: String,
-      required: true,
-      min: 6,
-      max: 255,
-    },
-    email: {
-      type: String,
-      required: true,
-      min: 6,
-      max: 255,
-    },
-    password: {
-      type: String,
-      required: true,
-      min: 6,
-      max: 1024,
-    },
-    jobs: {
-        type: [mongoose.Types.ObjectId], 
-        ref: 'jobs',
-        // required: true
-    },
-    date: {
-      type: Date,
-      default: Date.now,
-    },
-});
+const UserSchema = new mongoose.Schema({
+  name: {
+    type: String, 
+    required: true
+  },
+  jobs: {
+    type: [mongoose.Types.ObjectId], 
+    ref: 'Job',
+    // required: true
+  },
+})
 
-module.exports = mongoose.model('client', ClientSchema);
+UserSchema.plugin(passportLocalMongoose, {
+  usernameField: 'email'
+})
+
+module.exports = mongoose.model("User", UserSchema)
+
+// 

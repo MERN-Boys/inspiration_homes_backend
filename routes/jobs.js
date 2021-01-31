@@ -149,7 +149,7 @@ router.patch("/:id/:stage_id", (request, response) => {
 
         //owed and paid
         const origOwed = job.stages[index].owed
-        if (request.body.owed !== null){
+        if (request.body.owed !== undefined){
             job.stages[index].owed = request.body.owed
         }
         const newOwed = job.stages[index].owed
@@ -195,12 +195,14 @@ router.delete("/:id", (request, response) => {
         console.log(job.client)
         UserModel.findById(job.client)
         .then(user => {
-            let index = user.jobs.indexOf(job._id)
-            if (index !== -1){
-                user.jobs.splice(index, 1)
+            if (user){
+                let index = user.jobs.indexOf(job._id)
+                if (index !== -1){
+                    user.jobs.splice(index, 1)
+                }
+    
+                user.save()
             }
-
-            user.save()
             job.delete()
             return "Job Deleted"
         })

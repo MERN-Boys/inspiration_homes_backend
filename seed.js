@@ -52,12 +52,15 @@ UserModel.deleteMany({})
                 UserModel.findOne({"name": "TestClient"})
                 .then((user) => {
                     jobs[0].client = user._id
-                    return jobs[0]
+                    return [jobs[0], user]
                 })
-                .then(job => {
-                    job.save((err, result) => {
+                .then(thing => {
+                    thing[0].save((err, result) => {
                         console.log("SEEDED JOB")
-                        mongoose.disconnect();
+                        thing[1].jobs.push(result._id)
+                        thing[1].save(() => {
+                            mongoose.disconnect()
+                        })
                     })
                 })
             }
