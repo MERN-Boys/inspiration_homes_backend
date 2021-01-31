@@ -8,11 +8,13 @@ const app = express()
 const mongoose = require("mongoose")
 // const User = require("./models/users.js")
 const passport = require("passport")
-// const cors = require("cors")
+const cors = require("cors")
 const session = require('express-session')
 const cookieParser = require('cookie-parser')
 const MongoStore = require('connect-mongo')(session)
 require('./passport.js')
+
+mongoose.set('useCreateIndex', true);
 
 const { config } = require('dotenv');
 
@@ -33,24 +35,11 @@ mongoose.connect(connectionString, {
 .then(() => console.log("Connected to the database"))
 .catch(error => console.log(error))
 
-var allowCrossDomain = function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 
-    // intercept OPTIONS method
-    if ('OPTIONS' == req.method) {
-      res.send(200);
-    }
-    else {
-      next();
-    }
-};
-
-// app.use(cors({
-//   origin: "http://localhost:3000", // This should be changed to our front-end url
-//   credentials: true
-// }))
+app.use(cors({
+  origin: "http://localhost:3000", // This should be changed to our front-end url
+  credentials: true
+}))
 
 app.use(session({
   secret: "secret",
@@ -64,10 +53,12 @@ app.use(session({
 app.use(cookieParser('secret'))
 
 
-//Middleware
-app.use(allowCrossDomain)
+// //Middleware
 app.use(express.json())
 app.use(passport.initialize())
+
+
+
 app.use(passport.session())
 
 app.use("/jobs", require("./routes/jobs.js"))
