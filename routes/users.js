@@ -50,7 +50,7 @@ const passport = require("passport")
 //     // failureFlash : true // allow flash messages
 // }));
 
-router.post("/register", (req, res) => {
+router.post("/register", (req, res, next) => {
     console.log(req.body)
     User.register(new User({name: req.body.name, email: req.body.email}), req.body.password, (err, user) => {
         if (err) {
@@ -58,28 +58,33 @@ router.post("/register", (req, res) => {
             console.log(err)
             res.send(err)
         }
-        console.log("HERE, What?")
-        // passport.authenticate('new', (err, user) => {
-        //     if (err) {
-        //         console.log(err)
-        //         res.send(err)
-        //     }
-        //     if (!user) {
-        //         res.sendStatus(401)
-        //     } else {
-        //         // No error, user found
-        //         // "login"
-        //         req.logIn(user, (error) => {
-        //             if (error) throw error
-        //             console.log(user)
-        //             res.send({user: req.user})
-        //         })
-        //     }
+        passport.authenticate('local', (err, user) => {
+            if (err) {
+                console.log(err)
+                res.send(err)
+            }
+            if (!user) {
+                res.sendStatus(401)
+            } else {
+                // No error, user found
+                // "login"
+                req.logIn(user, (error) => {
+                    if (error) throw error
+                    console.log(user)
+                    res.send({user: req.user})
+                })
+            }
+        })(req, res, next)
+        // passport.authenticate()(req, res, () => {
+        //     // console.log(user)
+        //     // res.sendStatus(200).send({user: user})
+        //     console.log(req.user)
+        //     req.logIn(user, (error) => {
+        //         if (error) throw error
+        //         console.log(user)
+        //         res.send({user: req.user})
+        //     })
         // })
-        passport.authenticate()(req, res, () => {
-            console.log(user)
-            res.send({user: user})
-        })
         // Session management
         // Send back session, user
         // return res.sendStatus(200)
@@ -91,7 +96,7 @@ router.post("/register", (req, res) => {
 // 2: Callback
 router.post("/login", (req, res, next) => {
     console.log("loggin in")
-    passport.authenticate('new', (err, user) => {
+    passport.authenticate('local', (err, user) => {
         if (err) {
             console.log(err)
             res.send(err)
@@ -150,6 +155,12 @@ router.get("/", (request, response) => {
 router.delete("/:id", (request, response) => {
     User.findByIdAndDelete(request.params.id)
     .then((document) => response.status(200).send(document))
+    .catch((error) => response.status(406).send(error.message))    
+})
+
+router.delete("/", (request, response) => {
+    User.deleteMany({})
+    .then(() => response.status(200))
     .catch((error) => response.status(406).send(error.message))    
 })
 
