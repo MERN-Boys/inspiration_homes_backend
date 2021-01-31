@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const User = require("../models/users.js")
 const passport = require("passport")
+const { check, validationResult } = require('express-validator');
 
 // passport.use(
 //     new passport.Strategy({
@@ -50,8 +51,17 @@ const passport = require("passport")
 //     // failureFlash : true // allow flash messages
 // }));
 
-router.post("/register", (req, res, next) => {
-    console.log(req.body)
+router.post("/register", 
+    [check('name').isLength({ min: 3 }),
+    //validate email is actually a valid email like a@b.c
+    check('email').isEmail(),],
+    (req, res, next) => {
+        //get errors from validation check
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() })
+        }
+    //if email correct format then register new user
     User.register(new User({name: req.body.name, email: req.body.email}), req.body.password, (err, user) => {
         if (err) {
             console.log(user)

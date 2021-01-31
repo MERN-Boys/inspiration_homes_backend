@@ -1,5 +1,6 @@
 const UserModel = require("./models/users.js")
 const JobModel = require("./models/jobs.js")
+const passport = require("passport")
 
 const mongoose = require("mongoose")
 const { config } = require('dotenv');
@@ -19,14 +20,15 @@ mongoose.connect(connectionString, {
 .catch(error => console.log(error))
 
 const users = [
-    new UserModel({
-        "name": "TestClient",
-        "email": "example@google.com",
-        "password": "password"
-    }),
-    new UserModel({
+    ({
         "name": "Builder",
-        "email": "example@google.com",
+        "email": "builder@google.com",
+        "password": "password",
+        "role": "Builder"
+    }),
+    ({
+        "name": "TestClient",
+        "email": "client@google.com",
         "password": "password"
     })
 ]
@@ -45,22 +47,33 @@ const jobs = [
 UserModel.deleteMany({})
 .then(() => JobModel.deleteMany({}))
 .then(() => {
-    users.map(async(u, index) => {
-        u.save((err, result) => {
+    users.map(async(obj, index) => {
+        console.log(obj)
+        UserModel.register(new UserModel({name: obj.name, email: obj.email, role: obj.role}), obj.password, (err, user) => {
+            if (err) {
+                console.log(user)
+                console.log(err)
+            }
+            passport.authenticate('local', (err, user) => {
+                if (err) {
+                    console.log(err)
+                }
+                if (!user) {
+                } else {
+                    req.logIn(user, (error) => {
+                    })
+                }
+            })
+
             if (index === users.length - 1){
+                console.log(index)
                 console.log("SEEDED USERS")
-                UserModel.findOne({"name": "TestClient"})
-                .then((user) => {
-                    jobs[0].client = user._id
-                    return [jobs[0], user]
-                })
-                .then(thing => {
-                    thing[0].save((err, result) => {
-                        console.log("SEEDED JOB")
-                        thing[1].jobs.push(result._id)
-                        thing[1].save(() => {
-                            mongoose.disconnect()
-                        })
+                jobs[0].client = user._id
+                jobs[0].save((err, result) => {
+                    console.log("SEEDED JOB")
+                    user.jobs.push(result._id)
+                    user.save(() => {
+                        mongoose.disconnect()
                     })
                 })
             }
