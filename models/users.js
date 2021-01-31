@@ -12,6 +12,10 @@ const UserSchema = new mongoose.Schema({
     ref: 'Job',
     // required: true
   },
+  role: {
+    type: String,
+    default: 'Client'
+  }
 })
 
 UserSchema.plugin(passportLocalMongoose, {
