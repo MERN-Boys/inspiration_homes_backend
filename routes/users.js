@@ -85,19 +85,6 @@ router.post("/register",
                 })
             }
         })(req, res, next)
-        // passport.authenticate()(req, res, () => {
-        //     // console.log(user)
-        //     // res.sendStatus(200).send({user: user})
-        //     console.log(req.user)
-        //     req.logIn(user, (error) => {
-        //         if (error) throw error
-        //         console.log(user)
-        //         res.send({user: req.user})
-        //     })
-        // })
-        // Session management
-        // Send back session, user
-        // return res.sendStatus(200)
     })
 })
 
@@ -116,6 +103,25 @@ router.post("/login", (req, res, next) => {
         } else {
             // No error, user found
             // "login"
+            req.logIn(user, (error) => {
+                if (error) throw error
+                console.log(user)
+                res.send({user: req.user})
+            })
+        }
+    })(req, res, next)
+})
+
+router.put("/edit", (req, res) => {
+    User.findById(req.body._id)
+    passport.authenticate('local', (err, user) => {
+        if (err) {
+            console.log(err)
+            res.send(err)
+        }
+        if (!user) {
+            res.sendStatus(401)
+        } else {
             req.logIn(user, (error) => {
                 if (error) throw error
                 console.log(user)
