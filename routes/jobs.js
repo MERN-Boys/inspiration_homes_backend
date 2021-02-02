@@ -2,6 +2,14 @@ const express = require("express")
 const router = express.Router()
 const JobModel = require("../models/jobs.js")
 const UserModel = require("../models/users.js")
+const fs = require('fs');
+const AWS = require('aws-sdk');
+const { config } = require('dotenv');
+config();
+
+const ID = process.env.AWS_ID
+const SECRET = process.env.AWS_SECRET
+const BUCKET_NAME = process.env.AWS_BUCKET
 
 /*
 {
@@ -34,6 +42,64 @@ const UserModel = require("../models/users.js")
 //UPDATE Job Stage properties
 //DELETE Job Stage
 
+router.post("/upload", (req, res) => {
+    console.log(req.files)
+    console.log(Object.keys(req.files).length)
+    const locations = {
+        num: Object.keys(req.files).length,
+        links: []
+    };
+    const uploadFileNew = (arrOfFiles, locations) => {
+        var promises=[];
+        for (const [key, value] of Object.entries(arrOfFiles)) {
+            promises.push(s3Upload(value, locations));
+        }
+        Promise.all(promises)
+        .catch(function(err){
+            res.send(err);
+            // console.log(err)
+        })         
+    }
+    
+    const s3Upload = (obj, locations) => {
+        // console.log(typeof obj)
+        const s3 = new AWS.S3({
+            accessKeyId: ID,
+            secretAccessKey: SECRET
+        })
+        // var base64data = Buffer.from(obj, 'binary');
+        const params = {
+            Bucket: BUCKET_NAME,
+            Key: obj.name, // File name you want to save as in S3
+            Body: obj.data
+        };
+        // let location = ''
+        // Uploading files to the bucket
+        s3.upload(params, (err, data) => {
+            if (err) {
+                throw err;
+            }
+            console.log(`File uploaded successfully.`);
+            locations.links.push({link: data.Location})
+            console.log(locations)
+            console.log(data.Location);
+            // return data.Location
+
+            // return location
+            if (locations.links.length === locations.num){
+                res.send({locations: locations.links})
+            }
+        })
+        // .then(data => {
+        //     return data
+        // })
+    }
+    uploadFileNew(req.files, locations)
+    // console.log(locations)
+    // res.send({locations: locations})
+    // res.send("sssd")
+})
+
 //GET JOBS
 router.get("/", (request, response) => {
     JobModel.find()
@@ -53,6 +119,7 @@ router.post("/", (request, response) => {
     JobModel.create(request.body)
     .then((document) => {
         UserModel.findById(request.body.client)
+        .then()
         .then(user => {
             user.jobs.push(document)
             user.save()
@@ -62,6 +129,8 @@ router.post("/", (request, response) => {
     })
     .catch((error) => response.status(406).send(error.message))    
 })
+
+
 
 // //UPDATE PRODUCT WHOLE
 // router.put("/:id", (request, response) => {

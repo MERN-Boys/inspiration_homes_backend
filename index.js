@@ -11,6 +11,7 @@ const passport = require("passport")
 const cors = require("cors")
 const session = require('express-session')
 const cookieParser = require('cookie-parser')
+const fileupload = require("express-fileupload");
 const MongoStore = require('connect-mongo')(session)
 require('./passport.js')
 
@@ -55,6 +56,7 @@ app.use(cookieParser('secret'))
 
 // //Middleware
 app.use(express.json())
+app.use(fileupload());
 app.use(passport.initialize())
 
 

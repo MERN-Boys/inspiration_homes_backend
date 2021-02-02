@@ -49,7 +49,6 @@ const JobsSchema = new mongoose.Schema({
         type: [
             {
                 link: {type: String},
-                description: {type: String}
             }
         ]
     },
@@ -65,7 +64,6 @@ const JobsSchema = new mongoose.Schema({
                 pictures: {type: [
                     {
                         link: {type: String},
-                        description: {type: String}
                     }
                 ]},
                 comments: {type: [
