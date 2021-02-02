@@ -80,7 +80,7 @@ router.post("/upload", (req, res) => {
                 throw err;
             }
             console.log(`File uploaded successfully.`);
-            locations.links.push(data.Location)
+            locations.links.push({link: data.Location})
             console.log(locations)
             console.log(data.Location);
             // return data.Location
