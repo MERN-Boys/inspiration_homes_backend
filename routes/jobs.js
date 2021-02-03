@@ -149,6 +149,8 @@ router.patch("/:id", (request, response) => {
         job.description = request.body.description || job.description
         job.buildAddress = request.body.buildAddress || job.buildAddress
 
+        console.log(job.designDocs)
+        console.log(request.body.designDocs)
         if (request.body.designDocs){
             job.designDocs = job.designDocs.concat(request.body.designDocs)
         }
