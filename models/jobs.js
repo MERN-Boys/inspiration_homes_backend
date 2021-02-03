@@ -37,12 +37,13 @@ const JobsSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    jobTitle: {
+    description: {
         type: String,
         required: true
     },
     buildAddress: {
         type: String,
+        unique: true,
         required: true
     },
     designDocs: {

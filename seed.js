@@ -36,7 +36,7 @@ const users = [
 const jobs = [
     new JobModel({
         "client": "0",
-        "jobTitle": "New Job",
+        "description": "description of job",
         "buildAddress": "6 Langdon Lane Bellmere 4510",
         "designDocs": {
             "link": "examplelink.com",
