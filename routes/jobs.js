@@ -146,9 +146,11 @@ router.patch("/:id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => {
         job.jobComplete = request.body.jobComplete || job.jobComplete
-        job.jobTitle = request.body.jobTitle || job.jobTitle
+        job.description = request.body.description || job.description
         job.buildAddress = request.body.buildAddress || job.buildAddress
 
+        console.log(job.designDocs)
+        console.log(request.body.designDocs)
         if (request.body.designDocs){
             job.designDocs = job.designDocs.concat(request.body.designDocs)
         }
