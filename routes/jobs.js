@@ -5,6 +5,7 @@ const UserModel = require("../models/users.js")
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const { config } = require('dotenv');
+const passport = require("passport")
 config();
 
 const ID = process.env.AWS_ID
@@ -101,10 +102,19 @@ router.post("/upload", (req, res) => {
 })
 
 //GET JOBS
-router.get("/", (request, response) => {
-    JobModel.find()
-    .then(jobs => response.send(jobs))
-    .catch(error => response.send(error))
+router.post("/get", (request, response) => {
+    const user = request.body.user
+
+    if (user.role === "Builder"){
+        JobModel.find()
+        .then(jobs => response.send(jobs))
+        .catch(error => response.send(error))
+    }
+    else {
+        JobModel.find({'_id': { $in: user.jobs}})
+        .then(jobs => response.send(jobs))
+        .catch(error => response.send(error))
+    }
 })
 
 //GET JOB
@@ -115,7 +125,7 @@ router.get("/:id", (request, response) => {
 })
 
 //CREATE JOB
-router.post("/", (request, response) => {
+router.post("/", (request, response, next) => {
     JobModel.create(request.body)
     .then((document) => {
         UserModel.findById(request.body.client)
@@ -123,9 +133,26 @@ router.post("/", (request, response) => {
         .then(user => {
             user.jobs.push(document)
             user.save()
+            .then((user) => {
+                console.log("loggin in")
+
+                request.logIn(user, (error) => {
+                    if (error) throw error
+                    console.log("passport session user")
+                    console.log(request.session.passport.user)
+                    // response.send({user: request.user})
+                    // response.sendStatus(200)
+                })
+                // .then(() => response.send(200))
+                // request.logIn(user, (error) => {
+                //     if (error) throw error
+                //     console.log(user)
+                //     // response.send("Job Created")
+                // })
+            })
         })
-        .then(response.status(201).send(document))
-        // response.status(201).send(document)
+        // .then(() => response.sendStatus(200))
+        .then(() => response.status(201).send(document))
     })
     .catch((error) => response.status(406).send(error.message))    
 })
