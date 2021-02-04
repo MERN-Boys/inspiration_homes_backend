@@ -105,7 +105,7 @@ router.post("/login", (req, res, next) => {
             // "login"
             req.logIn(user, (error) => {
                 if (error) throw error
-                console.log(user)
+                // console.log(user)
                 res.send({user: req.user})
             })
         }
@@ -136,7 +136,11 @@ router.get("/me", (req, res) => {
     // send back the user
     console.log("Hitting /me")
     if (req.user) {
-        res.send({user: req.user})
+        // console.log(req.user)
+        User.findById(req.user._id)
+        .then((user) => res.send({user: user}))
+        // res.send({user: req.user})
+
     } else {
         res.send({user: null})
     }
