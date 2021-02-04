@@ -37,11 +37,10 @@ const jobs = [
     new JobModel({
         "client": "0",
         "description": "description of job",
-        "buildAddress": "6 Langdon Lane Bellmere 4510",
-        "designDocs": {
-            "link": "examplelink.com",
-            "description": "Great balls of fire"
-        }
+        "buildAddress": "dummy address",
+        "designDocs": [{
+            "link": "fake-link.com",
+        }]
     })
 ]
 UserModel.deleteMany({})
