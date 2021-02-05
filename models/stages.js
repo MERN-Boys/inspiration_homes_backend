@@ -3,7 +3,7 @@ const stages = () => {
         {
             index: 0,
             name: "Pending",
-            status: "InProgress",
+            status: "AwaitingApproval",
             owed: 0,
             paid: 0,
             pictures: [],
