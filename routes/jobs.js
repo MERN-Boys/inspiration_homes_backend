@@ -239,25 +239,39 @@ router.patch("/:id", (request, response) => {
 router.patch("/:id/:stage_id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => {
+        console.log(request.body)
         //get index
         index = request.params.stage_id
 
-        //status
+        //status: Only change from InProgress to PaymentPending
         job.stages[index].status = request.body.status || job.stages[index].status
-
+        
         //owed and paid
         const origOwed = job.stages[index].owed
         if (request.body.owed !== undefined){
             job.stages[index].owed = request.body.owed
+
+            const newOwed = job.stages[index].owed
+            if (newOwed < origOwed){
+                job.stages[index].paid = job.stages[index].paid + origOwed - newOwed
+            }
         }
-        const newOwed = job.stages[index].owed
-        if (newOwed < origOwed){
-            job.stages[index].paid = job.stages[index].paid + origOwed - newOwed
+
+        //if status = payment pending and amount owed = 0, 
+        // then status gets set to Complete, and next stage gets set to InProgress
+
+        if (job.stages[index].status === "PaymentPending" && job.stages[index].owed === 0){
+            job.stages[index].status = "Complete"
+        }
+        if (job.stages[index].status === "Complete"){
+            console.log("Going to next stage")
+            const indexNum = parseInt(index, 10);
+            job.stages[indexNum + 1].status = "InProgress"
         }
 
         //pictures and comments
         if (request.body.pictures){
-            job.stages[index].pictures = job.stages[index].pictures.concat(request.body.pictures )
+            job.stages[index].pictures = job.stages[index].pictures.concat(request.body.pictures)
         }
         if (request.body.comments){
             job.stages[index].comments = job.stages[index].comments.concat(request.body.comments)
@@ -267,7 +281,7 @@ router.patch("/:id/:stage_id", (request, response) => {
         return job
     })
     .then(job => {
-        console.log(job)
+        // console.log(job)
         response.send(job)
     })
     .catch(error => response.send(error)) 
