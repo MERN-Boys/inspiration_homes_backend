@@ -267,6 +267,7 @@ router.patch("/:id/:stage_id", (request, response) => {
             console.log("Going to next stage")
             const indexNum = parseInt(index, 10);
             job.stages[indexNum + 1].status = "InProgress"
+            console.log(job.stages[indexNum + 1].status)
         }
 
         //pictures and comments
@@ -278,11 +279,23 @@ router.patch("/:id/:stage_id", (request, response) => {
         }
 
         job.save()
-        return job
-    })
-    .then(job => {
-        // console.log(job)
-        response.send(job)
+        .then(() => {
+            const user = request.body.user
+    
+            if (user.role === "Builder"){
+                JobModel.find()
+                .then(jobs => response.send(jobs))
+                .catch(error => response.send(error))
+            }
+            else {
+                JobModel.find({'_id': { $in: user.jobs}})
+                .then(jobs => response.send(jobs))
+                .catch(error => response.send(error))
+            }
+            // console.log(job)
+            // response.send(job)
+        })
+        // return job
     })
     .catch(error => response.send(error)) 
 })
