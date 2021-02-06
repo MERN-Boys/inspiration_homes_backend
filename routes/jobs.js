@@ -240,6 +240,7 @@ router.patch("/:id/:stage_id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => {
         console.log(request.body)
+
         //get index
         index = request.params.stage_id
 
@@ -257,18 +258,27 @@ router.patch("/:id/:stage_id", (request, response) => {
             }
         }
 
-        //if status = payment pending and amount owed = 0, 
-        // then status gets set to Complete, and next stage gets set to InProgress
-
+        //If payment made set stage to complete
         if (job.stages[index].status === "PaymentPending" && job.stages[index].owed === 0){
             job.stages[index].status = "Complete"
         }
+
+        //if stage complete set next stage to inprogress
         if (job.stages[index].status === "Complete"){
-            console.log("Going to next stage")
-            const indexNum = parseInt(index, 10);
-            job.stages[indexNum + 1].status = "InProgress"
-            console.log(job.stages[indexNum + 1].status)
+            if (parseInt(index, 10) === job.stages.length - 1){
+                job.jobComplete = true
+                console.log("Job Complete!")
+            }
+            else {
+                console.log("Going to next stage")
+                const indexNum = parseInt(index, 10);
+                job.stages[indexNum + 1].status = "InProgress"
+                console.log(job.stages[indexNum + 1].status)
+            }
+
+
         }
+
 
         //pictures and comments
         if (request.body.pictures){
