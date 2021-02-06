@@ -239,36 +239,73 @@ router.patch("/:id", (request, response) => {
 router.patch("/:id/:stage_id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => {
+        console.log(request.body)
+
         //get index
         index = request.params.stage_id
 
-        //status
+        //status: Only change from InProgress to PaymentPending
         job.stages[index].status = request.body.status || job.stages[index].status
-
+        
         //owed and paid
         const origOwed = job.stages[index].owed
         if (request.body.owed !== undefined){
             job.stages[index].owed = request.body.owed
+
+            const newOwed = job.stages[index].owed
+            if (newOwed < origOwed){
+                job.stages[index].paid = job.stages[index].paid + origOwed - newOwed
+            }
         }
-        const newOwed = job.stages[index].owed
-        if (newOwed < origOwed){
-            job.stages[index].paid = job.stages[index].paid + origOwed - newOwed
+
+        //If payment made set stage to complete
+        if (job.stages[index].status === "PaymentPending" && job.stages[index].owed === 0){
+            job.stages[index].status = "Complete"
         }
+
+        //if stage complete set next stage to inprogress
+        if (job.stages[index].status === "Complete"){
+            if (parseInt(index, 10) === job.stages.length - 1){
+                job.jobComplete = true
+                console.log("Job Complete!")
+            }
+            else {
+                console.log("Going to next stage")
+                const indexNum = parseInt(index, 10);
+                job.stages[indexNum + 1].status = "InProgress"
+                console.log(job.stages[indexNum + 1].status)
+            }
+
+
+        }
+
 
         //pictures and comments
         if (request.body.pictures){
-            job.stages[index].pictures = job.stages[index].pictures.concat(request.body.pictures )
+            job.stages[index].pictures = job.stages[index].pictures.concat(request.body.pictures)
         }
         if (request.body.comments){
             job.stages[index].comments = job.stages[index].comments.concat(request.body.comments)
         }
 
         job.save()
-        return job
-    })
-    .then(job => {
-        console.log(job)
-        response.send(job)
+        .then(() => {
+            const user = request.body.user
+    
+            if (user.role === "Builder"){
+                JobModel.find()
+                .then(jobs => response.send(jobs))
+                .catch(error => response.send(error))
+            }
+            else {
+                JobModel.find({'_id': { $in: user.jobs}})
+                .then(jobs => response.send(jobs))
+                .catch(error => response.send(error))
+            }
+            // console.log(job)
+            // response.send(job)
+        })
+        // return job
     })
     .catch(error => response.send(error)) 
 })

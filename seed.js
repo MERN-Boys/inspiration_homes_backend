@@ -39,7 +39,7 @@ const jobs = [
         "description": "description of job",
         "buildAddress": "dummy address",
         "designDocs": [{
-            "link": "fake-link.com",
+            "link": "https://consecration-abomination.s3.amazonaws.com/building_plans.png",
         }]
     })
 ]
