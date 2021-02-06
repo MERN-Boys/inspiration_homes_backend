@@ -60,7 +60,7 @@ router.post("/register",
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() })
-        }
+    }
     //if email correct format then register new user
     User.register(new User({name: req.body.name, email: req.body.email}), req.body.password, (err, user) => {
         if (err) {
@@ -112,24 +112,43 @@ router.post("/login", (req, res, next) => {
     })(req, res, next)
 })
 
-router.put("/edit", (req, res) => {
-    User.findById(req.body._id)
-    passport.authenticate('local', (err, user) => {
-        if (err) {
-            console.log(err)
-            res.send(err)
-        }
-        if (!user) {
-            res.sendStatus(401)
-        } else {
+//edit user route
+router.put("/:id", 
+    [check('name').isLength({ min: 3 }),
+    //validate email is actually a valid email like a@b.c
+    check('email').isEmail(),],
+    (req, res) => {
+        //get errors from validation check
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() })
+    }
+    User.findById(req.params.id)
+    .then(user => {
+        user.name = req.body.name
+        user.email = req.body.email
+        //req.body.oldPassword
+        user.setPassword(req.body.password)
+        .then(() => user.save())
+        .then((user) => {
+            let newUser = user
+            console.log("user edited")
+
             req.logIn(user, (error) => {
-                if (error) throw error
-                console.log(user)
-                res.send({user: req.user})
+                if (error) {
+                    console.log(error)
+                    throw error
+                }
+                console.log("passport session user")
+                console.log(req.session.passport.user)
+
+                res.send({"user": user})
             })
-        }
-    })(req, res, next)
+        })
+    })
+    .catch(error => res.send(error))
 })
+
 
 router.get("/me", (req, res) => {
     // find the user
@@ -139,6 +158,7 @@ router.get("/me", (req, res) => {
         // console.log(req.user)
         User.findById(req.user._id)
         .then((user) => res.send({user: user}))
+        .catch(error => res.send(error))
         // res.send({user: req.user})
 
     } else {
