@@ -37,9 +37,9 @@ mongoose.connect(connectionString, {
 .catch(error => console.log(error))
 
 
-// origin: "http://localhost:3000", // This should be changed to our front-end url
 app.use(cors({
   origin: "https://inspiration-homes.herokuapp.com",
+  // origin: "http://localhost:3000", // This should be changed to our front-end url
   credentials: true
 }))
 
