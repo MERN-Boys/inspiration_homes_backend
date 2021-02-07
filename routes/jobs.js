@@ -236,7 +236,10 @@ router.patch("/:id", (request, response) => {
 router.patch("/:id/:stage_id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => {
-        job.clientName = request.body.user.name
+        if (request.body.user.role === "Client"){
+            job.clientName = request.body.user.name
+        }
+
         console.log(request.body)
 
         //get index
