@@ -106,7 +106,7 @@ router.post("/login", (req, res, next) => {
             req.logIn(user, (error) => {
                 if (error) throw error
                 // console.log(user)
-                res.send({user: req.user})
+                res.send({"user": req.user})
             })
         }
     })(req, res, next)
