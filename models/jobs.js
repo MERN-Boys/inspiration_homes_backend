@@ -37,6 +37,10 @@ const JobsSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    clientName: {
+        type: String,
+        required: false
+    },
     description: {
         type: String,
         required: true

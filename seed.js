@@ -36,6 +36,7 @@ const users = [
 const jobs = [
     new JobModel({
         "client": "0",
+        "clientName": "",
         "description": "description of job",
         "buildAddress": "dummy address",
         "designDocs": [{
@@ -68,6 +69,7 @@ UserModel.deleteMany({})
                 console.log(index)
                 console.log("SEEDED USERS")
                 jobs[0].client = user._id
+                jobs[0].clientName = user.name
                 jobs[0].save((err, result) => {
                     console.log("SEEDED JOB")
                     user.jobs.push(result._id)
