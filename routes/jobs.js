@@ -134,25 +134,22 @@ router.post("/", (request, response, next) => {
             user.jobs.push(document)
             user.save()
             .then((user) => {
-                console.log("loggin in")
+                console.log("addin job to user")
 
                 request.logIn(user, (error) => {
                     if (error) throw error
-                    console.log("passport session user")
-                    console.log(request.session.passport.user)
+                    // console.log("passport session user")
+                    // console.log(request.session.passport.user)
                     // response.send({user: request.user})
                     // response.sendStatus(200)
                 })
-                // .then(() => response.send(200))
-                // request.logIn(user, (error) => {
-                //     if (error) throw error
-                //     console.log(user)
-                //     // response.send("Job Created")
-                // })
+
+                console.log(user)
+                response.send({"user": user})
             })
         })
         // .then(() => response.sendStatus(200))
-        .then(() => response.status(201).send(document))
+        // .then(() => response.status(201).send(document))
     })
     .catch((error) => response.status(406).send(error.message))    
 })
