@@ -61,7 +61,6 @@ router.post("/register",
                 }
             })(req, res, next)
         })
-        .catch(error => res.send(error))
 })
 
 /* 
