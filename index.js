@@ -27,7 +27,14 @@ const database = process.env.MONGO_DBNAME
 // console.log(password)
 // console.log(database)
 
-const connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/${database}?retryWrites=true&w=majority`
+let connectionString;
+const env = process.env.NODE_ENV || "development"
+if( env === 'test') {
+  connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/testdb?retryWrites=true&w=majority`;
+} else {
+  connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/${database}?retryWrites=true&w=majority`
+}
+
 
 mongoose.connect(connectionString, {
     useNewUrlParser: true,
@@ -38,8 +45,8 @@ mongoose.connect(connectionString, {
 
 
 app.use(cors({
-  origin: "https://inspiration-homes.herokuapp.com",
-  // origin: "http://localhost:3000", // This should be changed to our front-end url
+  // origin: "https://inspiration-homes.herokuapp.com",
+  origin: "http://localhost:3000", // This should be changed to our front-end url
   credentials: true
 }))
 
@@ -77,3 +84,5 @@ app.get("/", (request, response) => {
 
 
 app.listen(process.env.PORT || 5000, () => {})
+
+module.exports = {app}
