@@ -1,17 +1,31 @@
+//get express library
 const express = require("express")
+
+//define router obj from express
 const router = express.Router()
+
+//import the job model
 const JobModel = require("../models/jobs.js")
+
+//import the user model
 const UserModel = require("../models/users.js")
-const fs = require('fs');
+
+//import aws upload library
 const AWS = require('aws-sdk');
+
+//get .env variables
 const { config } = require('dotenv');
-const passport = require("passport")
+// const passport = require("passport")
+
+//initialise env variables
 config();
 
+//define each of the aws variables from env
 const ID = process.env.AWS_ID
 const SECRET = process.env.AWS_SECRET
 const BUCKET_NAME = process.env.AWS_BUCKET
 
+//create user example for postman
 /*
 {
     "name": "Benjamin",
@@ -20,36 +34,31 @@ const BUCKET_NAME = process.env.AWS_BUCKET
 }
 */
 
+//create job example for postman
 /* 
 {
-    "client": "60112a6e5d720c04ca3ca07e",
+    "client": "60112a6e5d720c04ca3ca07e", //replace with existing user obj string
     "jobTitle": "New Job",
-    "buildAddress": "6 Langdon Lane Bellmere 4510",
-    "designDocs": {
-        "link": "examplelink.com",
-        "description": "Great balls of fire"
-    }
+    "buildAddress": "6 example address QLD",
+    "designDocs": [
+    ]
 }
 */
 
-//GET all jobs
-//GET singular job
-
-//CREATE Job
-//UPDATE Top level job properties
-//DELETE Job
-
-//CREATE Job Stage
-//UPDATE Job Stage properties
-//DELETE Job Stage
-
+//upload image/s
 router.post("/upload", (req, res) => {
+
+    //console logs for debug to check existence of files in upload
     console.log(req.files)
     console.log(Object.keys(req.files).length)
+
+    //create obj that will store links for the response obj back to front end
     const locations = {
         num: Object.keys(req.files).length,
         links: []
     };
+
+    //initial function that iterates through the files, creating a promise that recieves the s3Upload callback function
     const uploadFileNew = (arrOfFiles, locations) => {
         var promises=[];
         for (const [key, value] of Object.entries(arrOfFiles)) {
@@ -62,19 +71,21 @@ router.post("/upload", (req, res) => {
         })         
     }
     
+    //for each file in the obj, this function uploads the file to aws and returns a url, and then adds that url to the locations obj
+    //once the locations links arr length equals the length of the files initially fed to the function it sends the location links object back to the front end
     const s3Upload = (obj, locations) => {
-        // console.log(typeof obj)
+
         const s3 = new AWS.S3({
             accessKeyId: ID,
             secretAccessKey: SECRET
         })
-        // var base64data = Buffer.from(obj, 'binary');
+
         const params = {
             Bucket: BUCKET_NAME,
             Key: obj.name, // File name you want to save as in S3
             Body: obj.data
         };
-        // let location = ''
+
         // Uploading files to the bucket
         s3.upload(params, (err, data) => {
             if (err) {
@@ -84,32 +95,32 @@ router.post("/upload", (req, res) => {
             locations.links.push({link: data.Location})
             console.log(locations)
             console.log(data.Location);
-            // return data.Location
 
             // return location
             if (locations.links.length === locations.num){
                 res.send({locations: locations.links})
             }
         })
-        // .then(data => {
-        //     return data
-        // })
     }
+
+    //runs the upload file new function, feeding in the files sent from the request, and the empty locations obj
     uploadFileNew(req.files, locations)
-    // console.log(locations)
-    // res.send({locations: locations})
-    // res.send("sssd")
 })
 
 //GET JOBS
 router.post("/get", (request, response) => {
+    
+    //get user obj
     const user = request.body.user
 
+    //get all jobs and send back to front end if builder
     if (user.role === "Builder"){
         JobModel.find()
         .then(jobs => response.send(jobs))
         .catch(error => response.send(error))
     }
+
+    //if not builder send only jobs that are in the user obj jobs arr
     else {
         JobModel.find({'_id': { $in: user.jobs}})
         .then(jobs => response.send(jobs))
@@ -117,14 +128,15 @@ router.post("/get", (request, response) => {
     }
 })
 
-//GET JOB
+
+//GET JOB - Gets individual job and sents back to client, only used in testing
 router.get("/:id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => response.status(200).send(job))
     .catch(error => response.send(error.message))
 })
 
-//CREATE JOB
+//CREATE JOB - creates job from request body, then adds job id to user jobs array, and re logs in user and sends updated user to front end
 router.post("/", (request, response, next) => {
     JobModel.create(request.body)
     .then((document) => {
@@ -140,46 +152,35 @@ router.post("/", (request, response, next) => {
                     if (error) throw error
                     // console.log("passport session user")
                     // console.log(request.session.passport.user)
-                    // response.send({user: request.user})
-                    // response.sendStatus(200)
                 })
 
                 console.log(user)
                 response.send({"user": user})
             })
         })
-        // .then(() => response.sendStatus(200))
-        // .then(() => response.status(201).send(document))
     })
     .catch((error) => response.status(406).send(error.message))    
 })
 
-
-
-// //UPDATE PRODUCT WHOLE
-// router.put("/:id", (request, response) => {
-//     // job = JobModel.findById()
-//     JobModel.findOneAndReplace({_id: request.params.id}, request.body)
-//     .then(document => response.send(document))
-//     .catch(error => response.send(error))
-// })
-
-
-//UPDATE JOB
+//UPDATE JOB - updates main level of job, only description, address and design doc images
 router.patch("/:id", (request, response) => {
+    //find job
     JobModel.findById(request.params.id)
     .then(job => {
-        job.jobComplete = request.body.jobComplete || job.jobComplete
+
+        //update description or address if present
         job.description = request.body.description || job.description
         job.buildAddress = request.body.buildAddress || job.buildAddress
 
         console.log(job.designDocs)
         console.log(request.body.designDocs)
+
+        //add to design docs if present
         if (request.body.designDocs){
             job.designDocs = job.designDocs.concat(request.body.designDocs)
         }
-        // job.stages.concat(request.body.stages)
 
+        //mark as modified to make sure the document saves, not sure if necessary now but scared to delete lol
         job.markModified('anything');
         job.save(function(err){
             if(err){
@@ -192,47 +193,24 @@ router.patch("/:id", (request, response) => {
     .catch(error => response.send(error))
 })
 
-// //CREATE JOB STAGE
-// router.post("/:id/:stage_id", (request, response) => {
-//     JobModel.findById(request.params.id)
-//     .then(job => {
-//         //get index
-//         index = request.params.stage_id
+/* 
+//UPDATE JOB STAGE - 
+This is the big cheese route. After getting the job we use any data sent to 
+this route to update only those elements of a stage, and/or some specific
+higher job properties like job complete or clientName incase the name changes.
 
-//         job.stages.push()
+//--Other Features--//
+- Changing "Paid" and "Owed" is a simple calculation to track whats currently been paid by the client when the owed value is reduced.
 
-//         //status
-//         job.stages[index].status = request.body.status || job.stages[index].status
+- When a stage of a job has a status of payment pending and its owed value is reduced the zero the route changes status to complete
+and sets the following stage status to InProgress
 
-//         //owed and paid
-//         const origOwed = job.stages[index].owed
-//         if (request.body.owed !== null){
-//             job.stages[index].owed = request.body.owed
-//         }
-//         const newOwed = job.stages[index].owed
-//         if (newOwed < origOwed){
-//             job.stages[index].paid = job.stages[index].paid + origOwed - newOwed
-//         }
+- When the final stage is set to complete the jobComplete bool is set to true
 
-//         //pictures and comments
-//         if (request.body.pictures){
-//             job.stages[index].pictures = job.stages[index].pictures.concat(request.body.pictures )
-//         }
-//         if (request.body.comments){
-//             job.stages[index].comments = job.stages[index].comments.concat(request.body.comments)
-//         }
+- After all logic the job is saved, and then a get is run on the jobs model
+to get all the jobs relevent to the user and send them back to the front end
 
-//         job.save()
-//         return job
-//     })
-//     .then(job => {
-//         console.log(job)
-//         response.send(job)
-//     })
-//     .catch(error => response.send(error)) 
-// })
-
-//UPDATE JOB STAGE 
+*/
 router.patch("/:id/:stage_id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => {
@@ -276,10 +254,7 @@ router.patch("/:id/:stage_id", (request, response) => {
                 job.stages[indexNum + 1].status = "InProgress"
                 console.log(job.stages[indexNum + 1].status)
             }
-
-
         }
-
 
         //pictures and comments
         if (request.body.pictures){
@@ -303,15 +278,12 @@ router.patch("/:id/:stage_id", (request, response) => {
                 .then(jobs => response.send(jobs))
                 .catch(error => response.send(error))
             }
-            // console.log(job)
-            // response.send(job)
         })
-        // return job
     })
     .catch(error => response.send(error)) 
 })
 
-//DELETE JOB STAGE
+//DELETE JOB STAGE - Used in testing to delete job stages, job stages arent deleted in production 
 router.delete("/:id/:stage_id", (request, response) => {
     JobModel.findById(request.params.id)
     .then(job => {
@@ -324,7 +296,7 @@ router.delete("/:id/:stage_id", (request, response) => {
     .catch(error => response.status(406).send(error))
 })
 
-//DELETE JOB
+//DELETE JOB - Used in testing, jobs arent deleted in production
 router.delete("/:id", (request, response) => {
     JobModel.findById(request.params.id)
     .then((job) => {

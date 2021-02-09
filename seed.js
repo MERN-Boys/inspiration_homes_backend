@@ -1,7 +1,6 @@
 const UserModel = require("./models/users.js")
 const JobModel = require("./models/jobs.js")
 const passport = require("passport")
-
 const mongoose = require("mongoose")
 const { config } = require('dotenv');
 
@@ -19,6 +18,7 @@ mongoose.connect(connectionString, {
 .then(() => console.log("Connected to the database"))
 .catch(error => console.log(error))
 
+//define users to seed
 const users = [
     ({
         "name": "Builder",
@@ -33,6 +33,7 @@ const users = [
     })
 ]
 
+//define job to be seeded
 const jobs = [
     new JobModel({
         "client": "0",
@@ -44,6 +45,8 @@ const jobs = [
         }]
     })
 ]
+
+//purges db of users and jobs, then creates users using passport register, creates the job, and adds the job to the client user, then disconnects this file from the mongo db
 UserModel.deleteMany({})
 .then(() => JobModel.deleteMany({}))
 .then(() => {

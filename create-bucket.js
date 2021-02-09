@@ -20,3 +20,5 @@ s3.createBucket(params, (err, data) => {
     if (err) console.log(err)
     else console.log('Bucket Created Successfully', data.location)
 })
+
+//Used in testing to create a bucket from the app
