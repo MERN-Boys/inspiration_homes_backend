@@ -4,7 +4,7 @@
   "description": "Init Readme",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "NODE_ENC=test mocha --exit",
     "start": "nodemon index.js"
   },
   "repository": {
@@ -19,6 +19,7 @@
   "homepage": "https://github.com/asyncronous/inspiration_homes_backend#readme",
   "dependencies": {
     "aws-sdk": "^2.834.0",
+    "chai-http": "^4.3.0",
     "connect-mongo": "^3.2.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
@@ -31,9 +32,14 @@
     "nodemon": "^2.0.7",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^6.1.0"
+    "passport-local-mongoose": "^6.1.0",
+    "should-http": "^0.1.1"
   },
   "engines": {
     "node": "v14.13.1"
+  },
+  "devDependencies": {
+    "chai": "^4.3.0",
+    "mocha": "^8.2.1"
   }
 }
