@@ -26,7 +26,15 @@ config();
 const username = process.env.MONGO_USERNAME  
 const password = process.env.MONGO_PASSWORD
 const database = process.env.MONGO_DBNAME  
-const connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/${database}?retryWrites=true&w=majority`
+
+let connectionString;
+const env = process.env.NODE_ENV || "development"
+if( env === 'test') {
+  connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/testdb?retryWrites=true&w=majority`;
+} else {
+  connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/${database}?retryWrites=true&w=majority`
+}
+
 
 mongoose.connect(connectionString, {
     useNewUrlParser: true,
@@ -37,8 +45,8 @@ mongoose.connect(connectionString, {
 
 //used to auth access origin, and switch between local and deployed
 app.use(cors({
-  origin: "https://inspiration-homes.herokuapp.com",
-  // origin: "http://localhost:3000", // This should be changed to our front-end url
+  // origin: "https://inspiration-homes.herokuapp.com",
+  origin: "http://localhost:3000", // This should be changed to our front-end url
   credentials: true
 }))
 
@@ -73,5 +81,7 @@ app.get("/", (request, response) => {
     response.send("Welcome to the THUNDER")
 })
 
-//listens on port 5000 or the heroku port
+
 app.listen(process.env.PORT || 5000, () => {})
+
+module.exports = {app}
