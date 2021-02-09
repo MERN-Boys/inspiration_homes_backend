@@ -8,20 +8,27 @@ const should = chai.should()
 
 // const user = request.body.user 
 
+  before(async () => {
+    await Users.deleteMany({});
+  });
 
+  after(async () => {
+    await Users.deleteMany({});
+  });
+
+    before(async () => {
+      await Jobs.deleteMany({});
+    });
+
+    after(async () => {
+      await Jobs.deleteMany({});
+    });
 
 chai.use(chaiHttp)
 
 describe('Jobs', () => {
 
-    before(async () => {
-        await Jobs.deleteMany({})
-    })
-
-    after(async () => {
-        await Jobs.deleteMany({})
-    })
-
+    
 
 
     it('Should list all jobs', (done) => {
@@ -39,53 +46,105 @@ describe('Jobs', () => {
     })
 
 
+    let id = "";
+
     it("should add a user", (done) => {
       chai
         .request(app)
-        .post("users/register")
+        .post("/users/register")
         .set('Token', 'json')
-        .set('content-type', 'application/x-www-form-urlencoded')
+        .set('content-type', 'application/json')
         .send({
           'name': 'name',
-          'email': 'name@name.com',
+          'email': 'nanme@name.com',
           'password': 'password'
         })
         .end((err, res) => {
-          console.log(res);
-          console.log(err)
-          res.should.have.status(201);
-          //   res.body.should.be.a("object");
-          //   res.body.should.have.property("name");
-          //   res.body.should.have.property("description");
-          //   res.body.should.have.property("_id");
+          res.should.have.status(200);
+            res.body.should.be.a("object");
+            res.body.should.have.property("user");
+            res.body.user.should.have.property("name")
+            res.body.user.should.have.property("email");
+            res.body.user.should.have.property("_id");
+
           //   res.body.name.should.equal("test");
           //   res.body.description.should.equal("test");
+          id = res.body.user._id
+          done();
+        });
+    });
+
+    it("edit a user", (done) => {
+      chai
+        .request(app)
+        .put(`/users/${id}`)
+        .set("Token", "json")
+        .set("content-type", "application/json")
+        .send({
+          name: "name2",
+          email: "nanme@name.com",
+          password: "password",
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a("object");
+          res.body.should.have.property("user");
+          res.body.user.should.have.property("name");
+          res.body.user.should.have.property("email");
+          res.body.user.should.have.property("_id");
+          res.body.user.name.should.equal("name2")
+
+          //   res.body.name.should.equal("test");
+          //   res.body.description.should.equal("test");
+          id = res.body.user._id;
           done();
         });
     });
 
 
+    
+    let jobid = ""
 
-    // it("should add a job", (done) => {
-    //   chai
-    //     .request(app)
-    //     .post("jobs/")
-    //     .send({
-    //       "client": "60112a6e5d720c04ca3ca07e",
-    //       "jobTitle": "New Job",
-    //       "buildAddress": "6 Langdon Lane Bellmere 4510",
-    //     })
-    //     .end((err, res) => {
-    //         console.log(res)
-    //       res.should.have.status(201);
-    //     //   res.body.should.be.a("object");
-    //     //   res.body.should.have.property("name");
-    //     //   res.body.should.have.property("description");
-    //     //   res.body.should.have.property("_id");
-    //     //   res.body.name.should.equal("test");
-    //     //   res.body.description.should.equal("test");
-    //       done();
-    //     });
-    // });
+    it("should add a job", (done) => {
+      chai
+        .request(app)
+        .post("/jobs/")
+        .set("Token", "json")
+        .set("content-type", "application/json")
+        .send({
+          "client": id,
+          "description": "New Job",
+          "buildAddress": "6 Langdon Lane Bellmere 4510",
+          "designDocs": [],
+        })
+        .end((err, res) => {
+          console.log(res);
+          console.log(err);
+          res.should.have.status(200);
+          jobid = res.body.user.jobs[0]
+          done();
+        });
+    });
+
+    it("should edit a job", (done) => {
+      chai
+        .request(app)
+        .patch(`/jobs/${jobid}`)
+        .set("Token", "json")
+        .set("content-type", "application/json")
+        .send({
+          client: id,
+          description: "Edited Job",
+          buildAddress: "6 Langdon Lane Bellmere 4510",
+          designDocs: [],
+        })
+        .end((err, res) => {
+          console.log(res);
+          console.log(err);
+          res.should.have.status(200);
+          res.body.description.should.equal("Edited Job")
+          done();
+        });
+    });
 
 })
