@@ -27,13 +27,17 @@ const username = process.env.MONGO_USERNAME
 const password = process.env.MONGO_PASSWORD
 const database = process.env.MONGO_DBNAME  
 
-let connectionString;
-const env = process.env.NODE_ENV || "development"
-if( env === 'test') {
-  connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/testdb?retryWrites=true&w=majority`;
-} else {
-  connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/${database}?retryWrites=true&w=majority`
-}
+// //Use to run backend tests
+// let connectionString
+// const env = process.env.NODE_ENV || "development"
+// if( env === 'test') {
+//   connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/testdb?retryWrites=true&w=majority`;
+// } else {
+//   connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/${database}?retryWrites=true&w=majority`
+// }
+
+let connectionString = `mongodb+srv://${username}:${password}@cluster0.rqngg.mongodb.net/${database}?retryWrites=true&w=majority`;
+
 
 
 mongoose.connect(connectionString, {
