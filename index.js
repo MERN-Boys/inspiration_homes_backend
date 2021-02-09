@@ -45,8 +45,8 @@ mongoose.connect(connectionString, {
 
 //used to auth access origin, and switch between local and deployed
 app.use(cors({
-  // origin: "https://inspiration-homes.herokuapp.com",
-  origin: "http://localhost:3000", // This should be changed to our front-end url
+  origin: "https://inspiration-homes.herokuapp.com",
+  // origin: "http://localhost:3000", // This should be changed to our front-end url
   credentials: true
 }))
 
