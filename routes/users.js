@@ -4,31 +4,6 @@ const User = require("../models/users.js")
 const passport = require("passport")
 const { check, validationResult } = require('express-validator');
 
-// passport.use(
-//     new passport.Strategy({
-
-//         usernameField : 'email',
-
-//         passwordField : 'password',
-
-//         passReqToCallback : true 
-//     },
-//     function(req, username, password, done) {
-
-//         User.findOne({email: username}, function(err, user) {
-//             if (err) { return done(err); }
-//             if (!user) {
-//                  return done(null, false, { message: 'Incorrect username.' });
-//              }
-//             if (!user.validPassword(password)) {
-//                  return done(null, false, { message: 'Incorrect password.' });
-//             }
-//             return done(null, user);
-//         })
-
-//     })
-// )
-
 //post
 //create
 //users/
@@ -45,12 +20,12 @@ const { check, validationResult } = require('express-validator');
 //edit
 //user/:id
 
-// router.post('/register', passport.authenticate('local-signup',  (err, user) => {
-//     // successRedirect : '/', // redirect to the secure profile section
-//     // failureRedirect : '/register', // redirect back to the signup page if there is an error
-//     // failureFlash : true // allow flash messages
-// }));
-
+/* 
+//creates user model object, 
+validates email field is actually an email, 
+registers the user and authenticates using passport strategy
+logs in and sends user object back
+*/
 router.post("/register", 
     [check('name').isLength({ min: 3 }),
     //validate email is actually a valid email like a@b.c
@@ -60,37 +35,38 @@ router.post("/register",
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() })
-    }
-    //if email correct format then register new user
-    User.register(new User({name: req.body.name, email: req.body.email}), req.body.password, (err, user) => {
-        if (err) {
-            console.log(user)
-            console.log(err)
-            res.send(err)
         }
-        passport.authenticate('local', (err, user) => {
+        //if email correct format then register new user
+        User.register(new User({name: req.body.name, email: req.body.email}), req.body.password, (err, user) => {
             if (err) {
+                console.log(user)
                 console.log(err)
                 res.send(err)
             }
-            if (!user) {
-                res.sendStatus(401)
-            } else {
-                // No error, user found
-                // "login"
-                req.logIn(user, (error) => {
-                    if (error) throw error
-                    console.log(user)
-                    res.send({user: req.user})
-                })
-            }
-        })(req, res, next)
-    })
+            passport.authenticate('local', (err, user) => {
+                if (err) {
+                    console.log(err)
+                    res.send(err)
+                }
+                if (!user) {
+                    res.sendStatus(401)
+                } else {
+                    // No error, user found
+                    // "login"
+                    req.logIn(user, (error) => {
+                        if (error) throw error
+                        console.log(user)
+                        res.send({user: req.user})
+                    })
+                }
+            })(req, res, next)
+        })
+        .catch(error => res.send(error))
 })
 
-// #authenticate 2 Args
-// 1: strategy
-// 2: Callback
+/* 
+authenticates login details and logs in user, then sends user obj back to front end
+*/
 router.post("/login", (req, res, next) => {
     console.log("loggin in")
     passport.authenticate('local', (err, user) => {
@@ -112,7 +88,7 @@ router.post("/login", (req, res, next) => {
     })(req, res, next)
 })
 
-//edit user route
+//edit user route, does same as register except changes existing users name/email and uses passport setpassword function
 router.put("/:id", 
     [check('name').isLength({ min: 3 }),
     //validate email is actually a valid email like a@b.c
@@ -149,7 +125,7 @@ router.put("/:id",
     .catch(error => res.send(error))
 })
 
-
+//gets the current user object from the database when present in the session 
 router.get("/me", (req, res) => {
     // find the user
     // send back the user
@@ -166,38 +142,27 @@ router.get("/me", (req, res) => {
     }
 })
 
+//logs the user out
 router.get("/logout", (req, res) => {
     req.logout()
     res.redirect("/")
 })
 
-// GET PRODUCTS
+// GET USERS - Only used in testing
 router.get("/", (request, response) => {
     User.find()
     .then(user => response.send(user))
     .catch(error => response.send(error))
 })
 
-// //GET PRODUCT
-// router.get("/:id", (request, response) => {
-//     UserModel.findById(request.params.id)
-//     .then(job => response.status(200).send(job))
-//     .catch(error => response.send(error.message))
-// })
-
-// //CREATE PRODUCT
-// router.post("/", (request, response) => {
-//     UserModel.create(request.body)
-//     .then((document) => response.status(201).send(document))
-//     .catch((error) => response.status(406).send(error.message))    
-// })
-
+// DELETE USER - Only used in testing
 router.delete("/:id", (request, response) => {
     User.findByIdAndDelete(request.params.id)
     .then((document) => response.status(200).send(document))
     .catch((error) => response.status(406).send(error.message))    
 })
 
+// DELETE ALL USERS - Only used in testing
 router.delete("/", (request, response) => {
     User.deleteMany({})
     .then(() => response.status(200))

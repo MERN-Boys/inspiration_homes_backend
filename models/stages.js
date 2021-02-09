@@ -1,3 +1,4 @@
+//holds an array of objects that define each stage of a build
 const stages = () => {
     return [
         {

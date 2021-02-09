@@ -1,7 +1,9 @@
 const mongoose = require("mongoose")
-const passportLocalMongoose = require("passport-local-mongoose")
-const passport = require("passport")
 
+//get passport local mongoose strategy
+const passportLocalMongoose = require("passport-local-mongoose")
+
+//define user model structure
 const UserSchema = new mongoose.Schema({
   name: {
     type: String, 
@@ -10,7 +12,6 @@ const UserSchema = new mongoose.Schema({
   jobs: {
     type: [mongoose.Types.ObjectId], 
     ref: 'Job',
-    // required: true
   },
   role: {
     type: String,
@@ -18,10 +19,10 @@ const UserSchema = new mongoose.Schema({
   }
 })
 
+//adds passport functionality to user model, and changes username field to 'email'
 UserSchema.plugin(passportLocalMongoose, {
   usernameField: 'email'
 })
 
+//export model
 module.exports = mongoose.model("User", UserSchema)
-
-// 

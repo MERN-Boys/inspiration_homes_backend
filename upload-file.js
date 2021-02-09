@@ -8,9 +8,8 @@ const SECRET = process.env.AWS_SECRET
 const BUCKET_NAME = process.env.AWS_BUCKET
 
 const uploadFile = (arrOfFiles) => {
+    
     // Read content from the file
-    // const fileContent = fs.readFileSync(fileName);
-
     const s3 = new AWS.S3({
         accessKeyId: ID,
         secretAccessKey: SECRET
@@ -96,3 +95,5 @@ let arrOfFiles = [
 ]
 
 uploadFileNew(arrOfFiles)
+
+//test file for uploading files to aws
